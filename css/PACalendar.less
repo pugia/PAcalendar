@@ -1,0 +1,114 @@
+@PABackground: transparent;
+@PAMainColor: #f20;
+@PATextColor: #000;
+
+.PACalendar {
+	
+	& > header, & > section {
+		
+		margin-left: 2%;
+			
+		&.PAheader, &.PAweek {
+			height: 30px;
+			
+			span {
+				background: transparent;
+				cursor: pointer;
+				
+				svg {
+					vertical-align: middle;
+				}
+				
+				&.PAHmonth {
+					font-size: 20px;
+					cursor: default;
+				}
+				
+				&.PAHnext, &.PAHprev {
+					
+					&:hover {
+						
+						svg {
+							background: lighten(@PAMainColor, 10%);
+							border-radius: 3px;
+						}
+						
+					}
+				}
+				
+				
+			}
+		}
+		
+		&.PAweek {
+			span {
+				font-weight: bold;
+			}
+		}
+	
+		&.PAmonth {
+			height: 180px;
+			
+			span {
+				color: fade(@PATextColor, 40%);
+				cursor: default;
+				border-radius: 3px;
+				
+				&.active {
+					cursor: pointer;
+					background: transparent;
+					color: @PATextColor;
+					
+					&:hover {
+						background: lighten(@PAMainColor, 20%);
+					}
+					
+				}
+				
+				&.selected {
+					background: @PAMainColor;
+					
+					&:hover {
+						background: @PAMainColor;
+					}
+										
+				}
+				
+				&.from {
+					border-bottom-right-radius: 0;
+					border-top-right-radius: 0;
+				}
+
+				&.to {
+					border-bottom-left-radius: 0;
+					border-top-left-radius: 0;
+				}
+				
+				
+				&.between {
+					background: lighten(@PAMainColor, 30%);
+					border-radius: 0;
+				}
+				
+			}
+			
+		}
+		
+		span {
+			float: left;
+			width: 14%;
+			height: 30px;
+			text-align: center;
+			box-sizing: border-box;
+			line-height: 30px;
+			
+			&.PAHmonth {
+				width: 70%;
+				text-align: center;
+			}
+		}
+
+	}
+	
+	
+}

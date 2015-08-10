@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PACalendar</title>
+		
+		<link rel="stylesheet" href="css/PACalendar.css">
+		<link rel="stylesheet" href="css/example.css">
+		
+	</head>
+
+	<body>
+	
+		<div class="container PACalendar" id="test">
+			
+			
+			
+		</div>
+		
+		<div class="dates">
+			
+			<label for="from">From</label>
+			<input type="text" id="from" value="2015-08-13" />
+			
+			<br />
+			
+			<label for="to">To</label>
+			<input type="text" id="to" value="2015-08-23" />
+			
+		</div>
+	
+	</body>
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="js/moment.min.js"></script>
+	<script src="js/PACalendar.js"></script>
+	
+	
+	
+	
+	<script>
+	var cal;
+
+	$(function() {
+		
+		cal = $('#test').PACalendar({
+				prevArrow:		'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 24 24"><path d="M14,17c-0.3,0-0.5-0.1-0.7-0.3l-4-4c-0.4-0.4-0.4-1,0-1.4l4-4c0.4-0.4,1-0.4,1.4,0s0.4,1,0,1.4L11.4,12 l3.3,3.3c0.4,0.4,0.4,1,0,1.4C14.5,16.9,14.3,17,14,17z"></path></svg>'
+			,	nextArrow:		'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 24 24"><path d="M10,17c-0.3,0-0.5-0.1-0.7-0.3c-0.4-0.4-0.4-1,0-1.4l3.3-3.3L9.3,8.7c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l4,4 c0.4,0.4,0.4,1,0,1.4l-4,4C10.5,16.9,10.3,17,10,17z"></path></svg>'
+			,	from: {
+					element: $('#from')
+				}
+			,	to: {
+					element: $('#to')
+				}
+			,	mode: 'range'
+		});
+		
+	})
+	
+	
+	</script>
+	
+
+</html>
