@@ -28,7 +28,7 @@
 		if (settings.to.date == null && settings.to.element) {
 			settings.to.date = moment(settings.to.element.val());
 		}
-				
+						
 		var mode = true;
 		var displayDate = moment(settings.from.date);
 		var selectedDateFrom = moment(settings.from.date).format('YYYYMMDD');
@@ -64,9 +64,7 @@
 			
 		monthEl
 			.on('click', 'span.active', function() {
-				
-				console.log(mode);
-				
+								
 				var modeClass = mode ? 'to' : 'from';
 								
 				monthEl.find('span:not(.'+modeClass+')').removeClass('selected')
@@ -143,6 +141,7 @@
 				.append(headerNextEl)
 								
 			self
+				.addClass('PACalendar')
 				.append(headerEl)	
 				.append(weekEl)
 				.append(monthEl)	
