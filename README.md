@@ -1,2 +1,2 @@
-# PACalendar
-jQuery Plugin for datepicker and rangepicker
+# PAcalendar
+jQuery Plugin for datepicker and rangepicker based on moment.js
