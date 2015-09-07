@@ -1,0 +1,14 @@
+{
+	"name": "PAcalendar",
+	"description": " jQuery Plugin for datepicker and rangepicker ",
+	"version": "0.0.1",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/pugia/PACalendar.git"
+	},
+	"dependencies": {
+		"jquery": "^2.*",
+		"moment": "^2.10.6"
+	}
+}
