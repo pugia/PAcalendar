@@ -54,6 +54,10 @@
 			,	mode: 'range'
 		});
 		
+		cal.on('setDate', function(args) {
+			console.log(args.from, args.to);
+		})
+		
 	})
 	
 	

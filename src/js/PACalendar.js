@@ -110,6 +110,22 @@
 					
 				}
 				
+				if (settings.mode == 'range' && selectedDateFrom && selectedDateTo) {
+					self.trigger({
+						type: 'setDate', 
+						from: parseInt(selectedDateFrom), 
+						to: parseInt(selectedDateTo)
+					});
+				}
+
+				if (settings.mode != 'range' && selectedDateFrom) {
+					self.trigger({
+						type: 'setDate',
+						from: parseInt(selectedDateFrom)
+					});
+				}
+
+				
 				$('.date_element[rel="'+ _id +'"]').removeClass('active');
 				settings[mode ? 'from' : 'to'].element.addClass('active');
 				
