@@ -1,0 +1,35 @@
+{
+	"name": "PAcalendar",
+	"description": "jQuery Plugin for datepicker and rangepicker",
+  "main": [
+    "dist/js/PAcalendar.min.js",
+    "dist/css/PAcalendar.min.css"
+  ],
+  "dependencies": {
+    "moment": "~2.10.6"
+  },
+  "devDependencies": {
+    "jquery": "~2.*"
+  },
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "calendar",
+    "datepicker",
+    "rangepicker"
+  ],
+  "authors": [
+    { "name": "Marco Pugliese", "email": "marco@pugia.com" }
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "config.codekit",
+    "package.json",
+    "sample"
+  ],
+  "private": false
+}
