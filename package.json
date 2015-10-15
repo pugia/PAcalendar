@@ -8,7 +8,9 @@
 		"url": "https://github.com/pugia/PACalendar.git"
 	},
 	"dependencies": {
-		"jquery": "^2.*",
 		"moment": "^2.10.6"
+	},
+	"devDependencies": {
+		"jquery": "^2.*"		
 	}
 }
