@@ -18,7 +18,7 @@
 					element: $('[data-element="to"]')
 				}
 			,	mode: 'date' // range
-			,	locale: 'en' // use moment.locale
+			,	locale: moment.locale()
 			, format: 'YYYY-MM-DD'
 		}, options );
 		
