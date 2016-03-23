@@ -78,7 +78,6 @@
 			.on('click', 'span.active', function() {
 								
 				var modeClass = mode ? 'to' : 'from';
-				console.log(modeClass);
 				monthEl.find('span:not(.'+modeClass+')').removeClass('selected')
 				$(this).addClass('selected');
 				var selectedDate = moment($(this).attr('data-value'), 'YYYYMMDD');
@@ -149,14 +148,9 @@
 			settings.from.element
 				.off('change keyup')
 				.on('change keyup', function() {
+					
+					self.setDateFrom($(this).val());
 
-					var date = moment($(this).val(), settings.format);
-					if (date.isValid()) {
-						monthEl.find('span:not(.to)').removeClass('selected from')
-						monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('selected from');
-						selectedDateFrom = moment(date);
-						cellsBetween();
-					}
 				})
 				.off('focus')
 				.on('focus', function() {
@@ -171,15 +165,9 @@
 			settings.to.element
 				.off('change keyup')
 				.on('change keyup', function() {
+					
+					self.setDateTo($(this).val());
 
-					var date = moment($(this).val(), settings.format);
-					if (date.isValid()) {
-						monthEl.find('span:not(.from)').removeClass('selected to')
-						monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('selected to');
-						
-						selectedDateTo = moment(date);
-						cellsBetween();
-					}
 				})
 				.off('focus')
 				.on('focus', function() {
@@ -191,13 +179,53 @@
 			
 		}
 		
-		// events
+		// EVENTS
 		// change mode
 		self.setMode = function(newMode) {
 			if (newMode == 'range' || newMode == 'date') {
-				settingsmode = newMode;
+				settings.mode = newMode;
 				popolateCalendar(selectedDateFrom);	
+				return true;
+			} else {
+				return false;
 			}
+		}
+		
+		// change from date
+		self.setDateFrom = function(changeDate) {
+			
+			var date = moment(changeDate, settings.format);
+			if (date.isValid()) {
+				monthEl.find('span:not(.to)').removeClass('selected from')
+				monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('selected from');
+				selectedDateFrom = moment(date);
+				cellsBetween();
+				return true;
+			} else {
+				return false;
+			}
+			
+		}
+		
+		// change to date
+		self.setDateTo = function(changeDate) {
+			
+			var date = moment(changeDate, settings.format);
+			if (date.isValid()) {
+				monthEl.find('span:not(.from)').removeClass('selected to')
+				monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('selected to');
+				selectedDateTo = moment(date);
+				cellsBetween();
+				return true;
+			} else {
+				return false;
+			}
+			
+		}
+		
+		// change both dates
+		self.setDate = function(changeFrom, changeTo) {
+			return (self.setDateFrom(changeFrom) && self.setDateTo(changeTo));
 		}
 		
 		return self;
@@ -259,7 +287,9 @@
 				
 				if (settings.mode == 'range') {
 					span.toggleClass('from', selectedDateFrom.isSame(value));
-					span.toggleClass('to', selectedDateTo.isSame(value));
+					if (selectedDateTo && selectedDateTo.isValid()) {
+						span.toggleClass('to', selectedDateTo.isSame(value));
+					}
 				}
 				
 				monthEl.append(span);
@@ -276,7 +306,7 @@
 				.find('span')
 				.removeClass('selected from to between');
 			
-			if (settings.mode == 'range' && selectedDateTo.isValid() && selectedDateFrom.isValid() && selectedDateFrom.isBefore(selectedDateTo)) {
+			if (settings.mode == 'range' && selectedDateTo && selectedDateTo.isValid() && selectedDateFrom.isValid() && selectedDateFrom.isBefore(selectedDateTo)) {
 				
 				monthEl.find('span[data-value]')
 					.each(function(i,e) {
@@ -287,7 +317,9 @@
 			}
 			
 			monthEl.find('span[data-value="'+ selectedDateFrom.format('YYYYMMDD') +'"]').removeClass('between').addClass('selected from');
-			monthEl.find('span[data-value="'+ selectedDateTo.format('YYYYMMDD') +'"]').removeClass('between').addClass('selected to');
+			if (settings.mode == 'range' && selectedDateTo && selectedDateTo.isValid()) {
+				monthEl.find('span[data-value="'+ selectedDateTo.format('YYYYMMDD') +'"]').removeClass('between').addClass('selected to');
+			}
 			
 		}
 		
