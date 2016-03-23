@@ -2,51 +2,61 @@
 (function ($) {
 	
   $.fn.PACalendar = function( options ) {
-	  
+
+		var self = this;
+			  
 		// default options
-    var settings = $.extend({
-				prevArrow:	 '&lt;'
-			,	nextArrow:	 '&gt;'
+    var settings = $.extend(true, {
+				prevArrow:	 '&laquo;'
+			,	nextArrow:	 '&raquo;'
 			,	from: {
-					date: moment().format('YYYY-MM-DD'),
-					element: null
+					date: moment(),
+					element: $('[data-element="from"]')
 				}
 			,	to:	{
 					date: null,
-					element: null
+					element: $('[data-element="to"]')
 				}
 			,	mode: 'date' // range
+			,	locale: 'en' // use moment.locale
+			, format: 'YYYY-MM-DD'
 		}, options );
-								
-		var self = this;
-		var _id = Math.random().toString(36).substring(7);
 		
+		moment.locale(settings.locale);
+								
+		var _id = Math.random().toString(36).substring(7);
+				
 		// fixing values
-		if (settings.from.date == null && settings.from.element) {
-			settings.from.date = moment(settings.from.element.val());
+		if (settings.from.element) {
+			settings.from.date = moment(settings.from.element.val(), settings.format);
+			if (!settings.from.date.isValid()) { settings.from.date = moment(); }
+			settings.from.element.val(moment(settings.from.date).format(settings.format));
 		}
-		if (settings.to.date == null && settings.to.element) {
-			settings.to.date = moment(settings.to.element.val());
+		if (settings.to.element) {
+			settings.to.date = moment(settings.to.element.val(), settings.format);
+			if (!settings.to.date.isValid()) { settings.to.date = moment(); }
+			settings.to.element.val(moment(settings.to.date).format(settings.format));
+			if (settings.to.date.isBefore(settings.from.date)) { 
+				settings.to.element.val(''); 
+				settings.to.date = null; 
+			}
+			
 		}
-						
+		
 		var mode = true;
 		var displayDate = moment(settings.from.date);
-		var selectedDateFrom = moment(settings.from.date).format('YYYYMMDD');
-		var selectedDateTo = (settings.mode == 'range') ? moment(settings.to.date).format('YYYYMMDD') : null;
-		
+		var selectedDateFrom = moment(settings.from.date);
+		var selectedDateTo = (settings.mode == 'range') ? moment(settings.to.date) : null;
+		settings.from.element.addClass('active');
 		// elements
 		var headerEl, headerPrevEl, headerNextEl, headerMonthEl, weekEl, monthEl;
 		
 		createStructure();
 		popolateCalendar(displayDate);	
 		monthEl.addClass(mode ? 'from' : 'to');
-
-		// events
-		self.refresh = function() {
-			console.log('refresh');
-		}
 		
 		headerNextEl
+			.off('click')
 			.on('click', function() {
 				
 				displayDate.add(1, 'months');
@@ -55,6 +65,7 @@
 			})
 			
 		headerPrevEl
+			.off('click')
 			.on('click', function() {
 				
 				displayDate.subtract(1, 'months');
@@ -63,18 +74,19 @@
 			})
 			
 		monthEl
+			.off('click', 'span.active')
 			.on('click', 'span.active', function() {
 								
 				var modeClass = mode ? 'to' : 'from';
-								
+				console.log(modeClass);
 				monthEl.find('span:not(.'+modeClass+')').removeClass('selected')
 				$(this).addClass('selected');
-				var selectedDate = $(this).data('value');
+				var selectedDate = moment($(this).attr('data-value'), 'YYYYMMDD');
 				
 				if (mode) {
 					selectedDateFrom = selectedDate;
 					if (settings.from.element) {
-						settings.from.element.val(moment(selectedDate, 'YYYYMMDD').format('YYYY-MM-DD'));
+						settings.from.element.val(moment(selectedDate, 'YYYYMMDD').format(settings.format));
 					}
 				}
 								
@@ -83,7 +95,7 @@
 					if (!mode) {
 						selectedDateTo = selectedDate;
 						if (settings.to.element) {
-							settings.to.element.val(moment(selectedDate, 'YYYYMMDD').format('YYYY-MM-DD'));
+							settings.to.element.val(moment(selectedDate, 'YYYYMMDD').format(settings.format));
 						}
 					}
 					
@@ -94,10 +106,10 @@
 						
 						monthEl.find('span').removeClass('selected between from to');
 						$(this).addClass('selected from');
-						selectedDateFrom = selectedDateTo;
+						selectedDateFrom = selectedDate;
 						selectedDateTo = null;
 						if (settings.from.element) {
-							settings.from.element.val(moment(selectedDate, 'YYYYMMDD').format('YYYY-MM-DD'));
+							settings.from.element.val(moment(selectedDate, 'YYYYMMDD').format(settings.format));
 						}
 						if (settings.to.element) {
 							settings.to.element.val('');
@@ -113,25 +125,80 @@
 				if (settings.mode == 'range' && selectedDateFrom && selectedDateTo) {
 					self.trigger({
 						type: 'setDate', 
-						from: parseInt(selectedDateFrom), 
-						to: parseInt(selectedDateTo)
+						from: moment(selectedDateFrom),
+						to: moment(selectedDateTo)
 					});
 				}
 
 				if (settings.mode != 'range' && selectedDateFrom) {
 					self.trigger({
 						type: 'setDate',
-						from: parseInt(selectedDateFrom)
+						from: moment(selectedDateFrom)
 					});
 				}
-
 				
-				$('.date_element[rel="'+ _id +'"]').removeClass('active');
+				$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('active');
 				settings[mode ? 'from' : 'to'].element.addClass('active');
-				
+								
 				cellsBetween();
 				
 			})
+			
+		if (settings.from.element) {
+			
+			settings.from.element
+				.off('change keyup')
+				.on('change keyup', function() {
+
+					var date = moment($(this).val(), settings.format);
+					if (date.isValid()) {
+						monthEl.find('span:not(.to)').removeClass('selected from')
+						monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('selected from');
+						selectedDateFrom = moment(date);
+						cellsBetween();
+					}
+				})
+				.off('focus')
+				.on('focus', function() {
+					mode = true;
+					$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('active');
+					settings.from.element.addClass('active');
+				})
+			
+			}
+			
+		if (settings.to.element) {
+			settings.to.element
+				.off('change keyup')
+				.on('change keyup', function() {
+
+					var date = moment($(this).val(), settings.format);
+					if (date.isValid()) {
+						monthEl.find('span:not(.from)').removeClass('selected to')
+						monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('selected to');
+						
+						selectedDateTo = moment(date);
+						cellsBetween();
+					}
+				})
+				.off('focus')
+				.on('focus', function() {
+					mode = false;
+					$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('active');
+					settings.to.element.addClass('active');
+				})
+
+			
+		}
+		
+		// events
+		// change mode
+		self.setMode = function(newMode) {
+			if (newMode == 'range' || newMode == 'date') {
+				settingsmode = newMode;
+				popolateCalendar(selectedDateFrom);	
+			}
+		}
 		
 		return self;
 		
@@ -146,7 +213,7 @@
 			
 			// week
 			weekEl = $('<section></section>').addClass('PAweek');
-			for (i = 1; i < 8; i++) {	weekEl.append($('<span></span>').text(moment().weekday(i).format('dd')));	}
+			for (i = 1; i < 8; i++) {	weekEl.append($('<span></span>').text(moment().day(i).format('dd')));	}
 			
 			// month
 			monthEl = $('<section></section>').addClass('PAmonth')
@@ -162,8 +229,8 @@
 				.append(weekEl)
 				.append(monthEl)	
 				
-			settings.from.element.addClass('date_element').attr('rel', _id);
-			settings.to.element.addClass('date_element').attr('rel', _id);
+			settings.from.element.addClass('PAcalendar_element').attr('rel', _id);
+			settings.to.element.addClass('PAcalendar_element').attr('rel', _id);
 			
 		}
 		
@@ -184,16 +251,15 @@
 			for (i = 0; i < 42; i++) {
 				var dd = momentDate.date();
 				var mm = momentDate.month();
-				var value = momentDate.format('YYYYMMDD');
+				var value = moment(momentDate);
 				var span = $('<span></span>')
 										.text(dd)
-										.attr('data-value', value)
+										.attr('data-value', value.format('YYYYMMDD'))
 										.toggleClass('active', (mm == current_month))
-										.toggleClass('selected', selectedDateFrom == value || selectedDateTo == value)
 				
 				if (settings.mode == 'range') {
-					span.toggleClass('from', selectedDateFrom == value);
-					span.toggleClass('to', selectedDateTo == value);
+					span.toggleClass('from', selectedDateFrom.isSame(value));
+					span.toggleClass('to', selectedDateTo.isSame(value));
 				}
 				
 				monthEl.append(span);
@@ -208,23 +274,23 @@
 			
 			monthEl
 				.find('span')
-				.removeClass('between');
-				
+				.removeClass('selected from to between');
 			
-			
-			if (settings.mode == 'range' && selectedDateTo != null && selectedDateFrom < selectedDateTo) {
+			if (settings.mode == 'range' && selectedDateTo.isValid() && selectedDateFrom.isValid() && selectedDateFrom.isBefore(selectedDateTo)) {
 				
-				monthEl
-					.find('.from')
-						.nextUntil('span.to')
-						.addClass('between');
+				monthEl.find('span[data-value]')
+					.each(function(i,e) {
+						var d = moment($(e).attr('data-value'), 'YYYYMMDD');
+						$(e).toggleClass('between', d.isAfter(selectedDateFrom) && d.isBefore(selectedDateTo));
+					})
 				
 			}
+			
+			monthEl.find('span[data-value="'+ selectedDateFrom.format('YYYYMMDD') +'"]').removeClass('between').addClass('selected from');
+			monthEl.find('span[data-value="'+ selectedDateTo.format('YYYYMMDD') +'"]').removeClass('between').addClass('selected to');
 			
 		}
 		
 	};
-
-
 
 }( jQuery ));

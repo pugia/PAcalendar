@@ -1,4 +1,3 @@
-@PABackground: transparent;
 @PAMainColor: #5cc6fc;
 @PATextColor: #444;
 
@@ -13,25 +12,24 @@
 			
 			span {
 				background: transparent;
-				cursor: pointer;
+				cursor: default;
 				
 				svg {
 					vertical-align: middle;
 				}
 				
 				&.PAHmonth {
-					font-size: 20px;
 					cursor: default;
 				}
 				
 				&.PAHnext, &.PAHprev {
 					
+					cursor: pointer;
+					
 					&:hover {
 						
-						svg {
-							background: lighten(@PAMainColor, 10%);
-							border-radius: 3px;
-						}
+						background: lighten(@PAMainColor, 10%);
+						border-radius: 3px;
 						
 					}
 				}
@@ -51,7 +49,6 @@
 			
 			span {
 				color: fade(@PATextColor, 40%);
-				cursor: default;
 				border-radius: 3px;
 				
 				&.active {
@@ -84,6 +81,9 @@
 					border-top-left-radius: 0;
 				}
 				
+				&.from.to {
+					border-radius: 3px;
+				}
 				
 				&.between {
 					background: lighten(@PAMainColor, 30%);

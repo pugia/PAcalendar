@@ -1,1 +1,7 @@
-div.container{width:300px;background:000}input.active{border:1px solid #f20}
+#test {
+  width: 300px;
+  background: 000;
+}
+input.active {
+  border: 1px solid #f20;
+}

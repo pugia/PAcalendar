@@ -10,52 +10,38 @@
 
 	<body>
 	
-		<div class="container" id="test">
-			
-			
-			
-		</div>
+		<div id="test"></div>
 		
 		<div class="dates">
 			
 			<label for="from">From</label>
-			<input type="text" id="from" value="2015-08-13" />
+			<input type="text" id="from" data-element="from" value="2015-08-13" />
 			
 			<br />
 			
 			<label for="to">To</label>
-			<input type="text" id="to" value="2015-08-23" />
+			<input type="text" id="to" data-element="to" value="2015-08-23" />
 			
 		</div>
 	
 	</body>
 	
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-	<script src="../node_modules/moment/min/moment.min.js"></script>
-	<script src="../dist/js/PAcalendar.min.js"></script>
-	
-	
-	
+	<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="../bower_components/moment/min/moment-with-locales.min.js"></script>
+	<script src="../src/js/PAcalendar.js"></script>
 	
 	<script>
 	var cal;
 
 	$(function() {
-		
+				
 		cal = $('#test').PACalendar({
-				prevArrow:		'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 24 24"><path d="M14,17c-0.3,0-0.5-0.1-0.7-0.3l-4-4c-0.4-0.4-0.4-1,0-1.4l4-4c0.4-0.4,1-0.4,1.4,0s0.4,1,0,1.4L11.4,12 l3.3,3.3c0.4,0.4,0.4,1,0,1.4C14.5,16.9,14.3,17,14,17z"></path></svg>'
-			,	nextArrow:		'<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 24 24"><path d="M10,17c-0.3,0-0.5-0.1-0.7-0.3c-0.4-0.4-0.4-1,0-1.4l3.3-3.3L9.3,8.7c-0.4-0.4-0.4-1,0-1.4s1-0.4,1.4,0l4,4 c0.4,0.4,0.4,1,0,1.4l-4,4C10.5,16.9,10.3,17,10,17z"></path></svg>'
-			,	from: {
-					element: $('#from')
-				}
-			,	to: {
-					element: $('#to')
-				}
-			,	mode: 'range'
+			mode: 'range',
+			locale: 'it',
 		});
 		
 		cal.on('setDate', function(args) {
-			console.log(args.from, args.to);
+			console.log(args.from.format('YYYYMMDD'), args.to.format('YYYYMMDD'));
 		})
 		
 	})
