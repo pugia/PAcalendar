@@ -7,19 +7,19 @@
 			  
 		// default options
     var settings = $.extend(true, {
-				prevArrow:	 '&laquo;'
-			,	nextArrow:	 '&raquo;'
-			,	from: {
-					date: moment(),
-					element: $('[data-element="from"]')
-				}
-			,	to:	{
-					date: null,
-					element: $('[data-element="to"]')
-				}
-			,	mode: 'date' // range
-			,	locale: moment.locale()
-			, format: 'YYYY-MM-DD'
+			prevArrow:	 '&laquo;',
+			nextArrow:	 '&raquo;',
+			from: {
+				date: moment(),
+				element: $('[data-element="from"]')
+			},	
+			to:	{
+				date: null,
+				element: $('[data-element="to"]')
+			},
+			mode: 'date', // range
+			locale: moment.locale(),
+			format: 'YYYY-MM-DD'
 		}, options );
 		
 		moment.locale(settings.locale);
@@ -46,14 +46,106 @@
 		var mode = true;
 		var displayDate = moment(settings.from.date);
 		var selectedDateFrom = moment(settings.from.date);
-		var selectedDateTo = (settings.mode == 'range') ? moment(settings.to.date) : null;
-		settings.from.element.addClass('active');
+		var selectedDateTo = (settings.mode === 'range') ? moment(settings.to.date) : null;
+		settings.from.element.addClass('PAactive');
 		// elements
 		var headerEl, headerPrevEl, headerNextEl, headerMonthEl, weekEl, monthEl;
 		
+		
+		// methods
+		function createStructure() {
+			
+			// header
+			headerEl = $('<header></header>').addClass('PAheader');
+			headerPrevEl = $('<span></span>').html(settings.prevArrow).addClass('PAHprev');
+			headerNextEl = $('<span></span>').html(settings.nextArrow).addClass('PAHnext');
+			headerMonthEl = $('<span></span>').addClass('PAHmonth');
+			
+			// week
+			weekEl = $('<section></section>').addClass('PAweek');
+			for (var i = 1; i < 8; i++) {	weekEl.append($('<span></span>').text(moment().day(i).format('dd')));	}
+			
+			// month
+			monthEl = $('<section></section>').addClass('PAmonth');
+			
+			headerEl
+				.append(headerPrevEl)
+				.append(headerMonthEl)
+				.append(headerNextEl);
+								
+			self
+				.addClass('PACalendar')
+				.append(headerEl)	
+				.append(weekEl)
+				.append(monthEl)	;
+				
+			settings.from.element.addClass('PAcalendar_element').attr('rel', _id);
+			settings.to.element.addClass('PAcalendar_element').attr('rel', _id);
+			
+		}
+		function popolateCalendar(date) {
+			
+			var momentDate = moment(date);
+			var current_month = momentDate.month();
+			var current_year = momentDate.year();
+
+			headerMonthEl.text(momentDate.format('MMMM YYYY')).attr('data-month', current_month).attr('data-year', current_year);
+										
+			// set start position from the first day of the week
+			momentDate.set('date', 1);
+			momentDate.subtract((momentDate.day() || 8)-1, 'days');
+			
+			monthEl.find('span').remove();
+			
+			for (var i = 0; i < 42; i++) {
+				var dd = momentDate.date();
+				var mm = momentDate.month();
+				var value = moment(momentDate);
+				var span = $('<span></span>')
+										.text(dd)
+										.attr('data-value', value.format('YYYYMMDD'))
+										.toggleClass('PAactive', (mm === current_month));
+				
+				if (settings.mode === 'range') {
+					span.toggleClass('PAfrom', selectedDateFrom.isSame(value));
+					if (selectedDateTo && selectedDateTo.isValid()) {
+						span.toggleClass('PAto', selectedDateTo.isSame(value));
+					}
+				}
+				
+				monthEl.append(span);
+				momentDate.add(1, 'days');
+			}
+			
+			cellsBetween();
+			
+		}
+		function cellsBetween() {
+			
+			monthEl
+				.find('span')
+				.removeClass('PAselected PAfrom PAto PAbetween');
+			
+			if (settings.mode === 'range' && selectedDateTo && selectedDateTo.isValid() && selectedDateFrom.isValid() && selectedDateFrom.isBefore(selectedDateTo)) {
+				
+				monthEl.find('span[data-value]')
+					.each(function(i,e) {
+						var d = moment($(e).attr('data-value'), 'YYYYMMDD');
+						$(e).toggleClass('PAbetween', d.isAfter(selectedDateFrom) && d.isBefore(selectedDateTo));
+					});
+				
+			}
+			
+			monthEl.find('span[data-value="'+ selectedDateFrom.format('YYYYMMDD') +'"]').removeClass('PAbetween').addClass('PAselected PAfrom');
+			if (settings.mode === 'range' && selectedDateTo && selectedDateTo.isValid()) {
+				monthEl.find('span[data-value="'+ selectedDateTo.format('YYYYMMDD') +'"]').removeClass('PAbetween').addClass('PAselected PAto');
+			}
+			
+		}
+		
 		createStructure();
 		popolateCalendar(displayDate);	
-		monthEl.addClass(mode ? 'from' : 'to');
+		monthEl.addClass(mode ? 'PAfrom' : 'PAto');
 		
 		headerNextEl
 			.off('click')
@@ -62,7 +154,7 @@
 				displayDate.add(1, 'months');
 				popolateCalendar(displayDate);
 				
-			})
+			});
 			
 		headerPrevEl
 			.off('click')
@@ -71,15 +163,15 @@
 				displayDate.subtract(1, 'months');
 				popolateCalendar(displayDate);
 				
-			})
+			});
 			
 		monthEl
-			.off('click', 'span.active')
-			.on('click', 'span.active', function() {
+			.off('click', 'span.PAactive')
+			.on('click', 'span.PAactive', function() {
 								
-				var modeClass = mode ? 'to' : 'from';
-				monthEl.find('span:not(.'+modeClass+')').removeClass('selected')
-				$(this).addClass('selected');
+				var modeClass = mode ? 'PAto' : 'PAfrom';
+				monthEl.find('span:not(.'+modeClass+')').removeClass('PAselected')
+				$(this).addClass('PAselected');
 				var selectedDate = moment($(this).attr('data-value'), 'YYYYMMDD');
 				
 				if (mode) {
@@ -89,7 +181,7 @@
 					}
 				}
 								
-				if (settings.mode == 'range') {
+				if (settings.mode === 'range') {
 					
 					if (!mode) {
 						selectedDateTo = selectedDate;
@@ -98,13 +190,13 @@
 						}
 					}
 					
-					monthEl.find('span').removeClass(mode ? 'from' : 'to');
-					$(this).addClass(mode ? 'from' : 'to');
+					monthEl.find('span').removeClass(mode ? 'PAfrom' : 'PAto');
+					$(this).addClass(mode ? 'PAfrom' : 'PAto');
 					
 					if (selectedDateTo < selectedDateFrom) {
 						
-						monthEl.find('span').removeClass('selected between from to');
-						$(this).addClass('selected from');
+						monthEl.find('span').removeClass('PAselected PAbetween PAfrom PAto');
+						$(this).addClass('PAselected PAfrom');
 						selectedDateFrom = selectedDate;
 						selectedDateTo = null;
 						if (settings.from.element) {
@@ -121,7 +213,7 @@
 					
 				}
 				
-				if (settings.mode == 'range' && selectedDateFrom && selectedDateTo) {
+				if (settings.mode === 'range' && selectedDateFrom && selectedDateTo) {
 					self.trigger({
 						type: 'setDate', 
 						from: moment(selectedDateFrom),
@@ -129,19 +221,19 @@
 					});
 				}
 
-				if (settings.mode != 'range' && selectedDateFrom) {
+				if (settings.mode !== 'range' && selectedDateFrom) {
 					self.trigger({
 						type: 'setDate',
 						from: moment(selectedDateFrom)
 					});
 				}
 				
-				$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('active');
-				settings[mode ? 'from' : 'to'].element.addClass('active');
+				$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('PAactive');
+				settings[mode ? 'from' : 'to'].element.addClass('PAactive');
 								
 				cellsBetween();
 				
-			})
+			});
 			
 		if (settings.from.element) {
 			
@@ -155,9 +247,9 @@
 				.off('focus')
 				.on('focus', function() {
 					mode = true;
-					$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('active');
-					settings.from.element.addClass('active');
-				})
+					$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('PAactive');
+					settings.from.element.addClass('PAactive');
+				});
 			
 			}
 			
@@ -172,9 +264,9 @@
 				.off('focus')
 				.on('focus', function() {
 					mode = false;
-					$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('active');
-					settings.to.element.addClass('active');
-				})
+					$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('PAactive');
+					settings.to.element.addClass('PAactive');
+				});
 
 			
 		}
@@ -182,22 +274,22 @@
 		// EVENTS
 		// change mode
 		self.setMode = function(newMode) {
-			if (newMode == 'range' || newMode == 'date') {
+			if (newMode === 'range' || newMode === 'date') {
 				settings.mode = newMode;
 				popolateCalendar(selectedDateFrom);	
 				return true;
 			} else {
 				return false;
 			}
-		}
+		};
 		
 		// change from date
 		self.setDateFrom = function(changeDate) {
 			
 			var date = moment(changeDate, settings.format);
 			if (date.isValid()) {
-				monthEl.find('span:not(.to)').removeClass('selected from')
-				monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('selected from');
+				monthEl.find('span:not(.PAto)').removeClass('PAselected PAfrom');
+				monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('PAselected PAfrom');
 				selectedDateFrom = moment(date);
 				cellsBetween();
 				return true;
@@ -205,15 +297,15 @@
 				return false;
 			}
 			
-		}
+		};
 		
 		// change to date
 		self.setDateTo = function(changeDate) {
 			
 			var date = moment(changeDate, settings.format);
 			if (date.isValid()) {
-				monthEl.find('span:not(.from)').removeClass('selected to')
-				monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('selected to');
+				monthEl.find('span:not(.PAfrom)').removeClass('PAselected PAto');
+				monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('PAselected PAto');
 				selectedDateTo = moment(date);
 				cellsBetween();
 				return true;
@@ -221,108 +313,15 @@
 				return false;
 			}
 			
-		}
+		};
 		
 		// change both dates
 		self.setDate = function(changeFrom, changeTo) {
 			return (self.setDateFrom(changeFrom) && self.setDateTo(changeTo));
-		}
+		};
 		
 		return self;
-		
-		// create structure
-		function createStructure() {
-			
-			// header
-			headerEl = $('<header></header>').addClass('PAheader');
-			headerPrevEl = $('<span></span>').html(settings.prevArrow).addClass('PAHprev');
-			headerNextEl = $('<span></span>').html(settings.nextArrow).addClass('PAHnext');
-			headerMonthEl = $('<span></span>').addClass('PAHmonth');
-			
-			// week
-			weekEl = $('<section></section>').addClass('PAweek');
-			for (i = 1; i < 8; i++) {	weekEl.append($('<span></span>').text(moment().day(i).format('dd')));	}
-			
-			// month
-			monthEl = $('<section></section>').addClass('PAmonth')
-			
-			headerEl
-				.append(headerPrevEl)
-				.append(headerMonthEl)
-				.append(headerNextEl)
-								
-			self
-				.addClass('PACalendar')
-				.append(headerEl)	
-				.append(weekEl)
-				.append(monthEl)	
 				
-			settings.from.element.addClass('PAcalendar_element').attr('rel', _id);
-			settings.to.element.addClass('PAcalendar_element').attr('rel', _id);
-			
-		}
-		
-		function popolateCalendar(date) {
-			
-			var momentDate = moment(date);
-			var current_month = momentDate.month();
-			var current_year = momentDate.year();
-
-			headerMonthEl.text(momentDate.format('MMMM YYYY')).attr('data-month', current_month).attr('data-year', current_year);
-										
-			// set start position from the first day of the week
-			momentDate.set('date', 1);
-			momentDate.subtract((momentDate.day() || 8)-1, 'days');
-			
-			monthEl.find('span').remove();
-			
-			for (i = 0; i < 42; i++) {
-				var dd = momentDate.date();
-				var mm = momentDate.month();
-				var value = moment(momentDate);
-				var span = $('<span></span>')
-										.text(dd)
-										.attr('data-value', value.format('YYYYMMDD'))
-										.toggleClass('active', (mm == current_month))
-				
-				if (settings.mode == 'range') {
-					span.toggleClass('from', selectedDateFrom.isSame(value));
-					if (selectedDateTo && selectedDateTo.isValid()) {
-						span.toggleClass('to', selectedDateTo.isSame(value));
-					}
-				}
-				
-				monthEl.append(span);
-				momentDate.add(1, 'days');
-			}
-			
-			cellsBetween();
-			
-		}
-		
-		function cellsBetween() {
-			
-			monthEl
-				.find('span')
-				.removeClass('selected from to between');
-			
-			if (settings.mode == 'range' && selectedDateTo && selectedDateTo.isValid() && selectedDateFrom.isValid() && selectedDateFrom.isBefore(selectedDateTo)) {
-				
-				monthEl.find('span[data-value]')
-					.each(function(i,e) {
-						var d = moment($(e).attr('data-value'), 'YYYYMMDD');
-						$(e).toggleClass('between', d.isAfter(selectedDateFrom) && d.isBefore(selectedDateTo));
-					})
-				
-			}
-			
-			monthEl.find('span[data-value="'+ selectedDateFrom.format('YYYYMMDD') +'"]').removeClass('between').addClass('selected from');
-			if (settings.mode == 'range' && selectedDateTo && selectedDateTo.isValid()) {
-				monthEl.find('span[data-value="'+ selectedDateTo.format('YYYYMMDD') +'"]').removeClass('between').addClass('selected to');
-			}
-			
-		}
-		
 	};
 
 }( jQuery ));

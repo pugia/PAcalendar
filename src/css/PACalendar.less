@@ -51,7 +51,7 @@
 				color: fade(@PATextColor, 40%);
 				border-radius: 3px;
 				
-				&.active {
+				&.PAactive {
 					cursor: pointer;
 					background: transparent;
 					color: @PATextColor;
@@ -62,7 +62,7 @@
 					
 				}
 				
-				&.selected {
+				&.PAselected {
 					background: @PAMainColor;
 					
 					&:hover {
@@ -71,21 +71,21 @@
 										
 				}
 				
-				&.from {
+				&.PAfrom {
 					border-bottom-right-radius: 0;
 					border-top-right-radius: 0;
 				}
 
-				&.to {
+				&.PAto {
 					border-bottom-left-radius: 0;
 					border-top-left-radius: 0;
 				}
 				
-				&.from.to {
+				&.PAfrom.PAto {
 					border-radius: 3px;
 				}
 				
-				&.between {
+				&.PAbetween {
 					background: lighten(@PAMainColor, 30%);
 					border-radius: 0;
 				}
