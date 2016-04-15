@@ -107,8 +107,8 @@
 				
 				var active = false;
 				active = mm === current_month;
-				if (settings.limit_to) { active = momentDate.isBefore(settings.limit_to); }
-				if (settings.limit_from) { active = momentDate.isAfter(settings.limit_from); }
+				if (settings.limit_to && active) { active = momentDate.isBefore(settings.limit_to); }
+				if (settings.limit_from && active) { active = momentDate.isAfter(settings.limit_from); }
 				
 				var span = $('<span></span>')
 										.text(dd)

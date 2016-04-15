@@ -44,7 +44,8 @@
 		
 		cal = $('#test').PACalendar({
 			mode: 'range',
-			rangeInterval: [7,'d']
+			limit_to: moment(),
+			limit_from: moment().subtract(1,'y')
 		});
 		
 		cal.on('setDate', function(args) {
@@ -71,7 +72,7 @@
 		$('#btn3')
 			.on('click', function() {
 				
-				cal.setRangeInterval([1,'w']);
+				cal.setRangeInterval([10,'d']);
 				
 			})
 		
