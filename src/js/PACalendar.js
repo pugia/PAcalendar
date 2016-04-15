@@ -18,6 +18,9 @@
 				element: $('[data-element="to"]')
 			},
 			mode: 'date', // range
+			rangeInterval: null, // work only for range mode, priority to "from" date
+			limit_to: null,
+			limit_from: null,
 			locale: moment.locale(),
 			format: 'YYYY-MM-DD'
 		}, options );
@@ -30,9 +33,10 @@
 		if (settings.from.element) {
 			settings.from.date = moment(settings.from.element.val(), settings.format);
 			if (!settings.from.date.isValid()) { settings.from.date = moment(); }
-			settings.from.element.val(moment(settings.from.date).format(settings.format));
 		}
+		
 		if (settings.to.element) {
+		
 			settings.to.date = moment(settings.to.element.val(), settings.format);
 			if (!settings.to.date.isValid()) { settings.to.date = moment(); }
 			settings.to.element.val(moment(settings.to.date).format(settings.format));
@@ -42,7 +46,7 @@
 			}
 			
 		}
-		
+			
 		var mode = true;
 		var displayDate = moment(settings.from.date);
 		var selectedDateFrom = moment(settings.from.date);
@@ -50,8 +54,7 @@
 		settings.from.element.addClass('PAactive');
 		// elements
 		var headerEl, headerPrevEl, headerNextEl, headerMonthEl, weekEl, monthEl;
-		
-		
+				
 		// methods
 		function createStructure() {
 			
@@ -101,10 +104,16 @@
 				var dd = momentDate.date();
 				var mm = momentDate.month();
 				var value = moment(momentDate);
+				
+				var active = false;
+				active = mm === current_month;
+				if (settings.limit_to) { active = momentDate.isBefore(settings.limit_to); }
+				if (settings.limit_from) { active = momentDate.isAfter(settings.limit_from); }
+				
 				var span = $('<span></span>')
 										.text(dd)
 										.attr('data-value', value.format('YYYYMMDD'))
-										.toggleClass('PAactive', (mm === current_month));
+										.toggleClass('PAactive', active);
 				
 				if (settings.mode === 'range') {
 					span.toggleClass('PAfrom', selectedDateFrom.isSame(value));
@@ -143,6 +152,31 @@
 			
 		}
 		
+		// fix TO value 
+		function fixRange(fromTop) {
+
+			fromTop = (typeof fromTop === 'undefined') ? false : true;
+
+			if (settings.rangeInterval && settings.rangeInterval.length === 2 && settings.rangeInterval instanceof Array && settings.mode === 'range') {
+				
+				if (!fromTop) {
+					selectedDateTo = moment(selectedDateFrom).add(settings.rangeInterval[0], settings.rangeInterval[1]).subtract(1,'d');
+				} else {
+					selectedDateFrom = moment(selectedDateTo).subtract(settings.rangeInterval[0], settings.rangeInterval[1]).add(1,'d');
+				}
+				
+				if (!fromTop && settings.to.element) {
+					settings.to.element.val(moment(selectedDateTo).format(settings.format));
+				}
+				if (fromTop && settings.from.element) {
+					settings.from.element.val(moment(selectedDateFrom).format(settings.format));				
+				}
+				
+			}
+
+		}
+		
+		fixRange();
 		createStructure();
 		popolateCalendar(displayDate);	
 		monthEl.addClass(mode ? 'PAfrom' : 'PAto');
@@ -164,74 +198,83 @@
 				popolateCalendar(displayDate);
 				
 			});
-			
+		
 		monthEl
 			.off('click', 'span.PAactive')
 			.on('click', 'span.PAactive', function() {
-								
-				var modeClass = mode ? 'PAto' : 'PAfrom';
-				monthEl.find('span:not(.'+modeClass+')').removeClass('PAselected')
-				$(this).addClass('PAselected');
-				var selectedDate = moment($(this).attr('data-value'), 'YYYYMMDD');
 				
-				if (mode) {
-					selectedDateFrom = selectedDate;
-					if (settings.from.element) {
-						settings.from.element.val(moment(selectedDate, 'YYYYMMDD').format(settings.format));
-					}
-				}
-								
-				if (settings.mode === 'range') {
 					
-					if (!mode) {
-						selectedDateTo = selectedDate;
-						if (settings.to.element) {
-							settings.to.element.val(moment(selectedDate, 'YYYYMMDD').format(settings.format));
-						}
-					}
+					var modeClass = mode ? 'PAto' : 'PAfrom';
+					monthEl.find('span:not(.'+modeClass+')').removeClass('PAselected');
+					$(this).addClass('PAselected');
+					var selectedDate = moment($(this).attr('data-value'), 'YYYYMMDD');
 					
-					monthEl.find('span').removeClass(mode ? 'PAfrom' : 'PAto');
-					$(this).addClass(mode ? 'PAfrom' : 'PAto');
-					
-					if (selectedDateTo < selectedDateFrom) {
-						
-						monthEl.find('span').removeClass('PAselected PAbetween PAfrom PAto');
-						$(this).addClass('PAselected PAfrom');
+					if (mode) {
 						selectedDateFrom = selectedDate;
-						selectedDateTo = null;
 						if (settings.from.element) {
 							settings.from.element.val(moment(selectedDate, 'YYYYMMDD').format(settings.format));
 						}
-						if (settings.to.element) {
-							settings.to.element.val('');
-						}
-						mode = false;
+					}
+									
+					if (settings.mode === 'range') {
 						
-					} else {
-						mode = !mode;
+						if (!mode) {
+							selectedDateTo = selectedDate;
+							if (settings.to.element) {
+								settings.to.element.val(moment(selectedDate, 'YYYYMMDD').format(settings.format));
+							}
+						}
+						
+						fixRange();
+						
+						monthEl.find('span').removeClass(mode ? 'PAfrom' : 'PAto');
+						$(this).addClass(mode ? 'PAfrom' : 'PAto');
+						
+						if (selectedDateTo < selectedDateFrom) {
+							
+							monthEl.find('span').removeClass('PAselected PAbetween PAfrom PAto');
+							$(this).addClass('PAselected PAfrom');
+							selectedDateFrom = selectedDate;
+							if (settings.from.element) {
+								settings.from.element.val(moment(selectedDate, 'YYYYMMDD').format(settings.format));
+							}
+							if (settings.to.element) {
+								settings.to.element.val('');
+							}
+							mode = false;
+							
+						} else {
+							mode = !mode;
+						}
+						
+						if (settings.rangeInterval && settings.rangeInterval.length === 2 && settings.rangeInterval instanceof Array) {
+							mode = true;	
+						}
+						
 					}
 					
-				}
+					if (settings.mode === 'range' && selectedDateFrom && selectedDateTo) {
+						self.trigger({
+							type: 'setDate', 
+							from: moment(selectedDateFrom),
+							to: moment(selectedDateTo)
+						});
+					}
+	
+					if (settings.mode !== 'range' && selectedDateFrom) {
+						self.trigger({
+							type: 'setDate',
+							from: moment(selectedDateFrom)
+						});
+					}
+					
+					
+					$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('PAactive');
+					settings[mode ? 'from' : 'to'].element.addClass('PAactive');
+									
+					cellsBetween();
 				
-				if (settings.mode === 'range' && selectedDateFrom && selectedDateTo) {
-					self.trigger({
-						type: 'setDate', 
-						from: moment(selectedDateFrom),
-						to: moment(selectedDateTo)
-					});
-				}
-
-				if (settings.mode !== 'range' && selectedDateFrom) {
-					self.trigger({
-						type: 'setDate',
-						from: moment(selectedDateFrom)
-					});
-				}
-				
-				$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('PAactive');
-				settings[mode ? 'from' : 'to'].element.addClass('PAactive');
-								
-				cellsBetween();
+			
 				
 			});
 			
@@ -263,7 +306,7 @@
 				})
 				.off('focus')
 				.on('focus', function() {
-					mode = false;
+					mode = (settings.rangeInterval && settings.rangeInterval.length === 2 && settings.rangeInterval instanceof Array && settings.mode === 'range') ? true: false;
 					$('.PAcalendar_element[rel="'+ _id +'"]').removeClass('PAactive');
 					settings.to.element.addClass('PAactive');
 				});
@@ -274,8 +317,11 @@
 		// EVENTS
 		// change mode
 		self.setMode = function(newMode) {
-			if (newMode === 'range' || newMode === 'date') {
+			if ((newMode === 'range' || newMode === 'date') && settings.mode !== newMode) {
 				settings.mode = newMode;
+				
+				if (settings.mode === 'date') { selectedDateTo = null; }
+				fixRange();
 				popolateCalendar(selectedDateFrom);	
 				return true;
 			} else {
@@ -291,7 +337,10 @@
 				monthEl.find('span:not(.PAto)').removeClass('PAselected PAfrom');
 				monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('PAselected PAfrom');
 				selectedDateFrom = moment(date);
+				
+				fixRange();
 				cellsBetween();
+				
 				return true;
 			} else {
 				return false;
@@ -307,11 +356,24 @@
 				monthEl.find('span:not(.PAfrom)').removeClass('PAselected PAto');
 				monthEl.find('span[data-value="'+ date.format('YYYYMMDD') +'"]').addClass('PAselected PAto');
 				selectedDateTo = moment(date);
+				
+				fixRange(true);
 				cellsBetween();
+				
 				return true;
 			} else {
 				return false;
 			}
+			
+		};
+		
+		// set range interval
+		self.setRangeInterval = function(interval) {
+			
+			settings.rangeInterval = interval;
+			
+			fixRange();
+			cellsBetween();
 			
 		};
 		

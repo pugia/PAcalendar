@@ -23,6 +23,13 @@
 			<input type="text" id="to" data-element="to" value="2015-08-23" />
 			
 		</div>
+		
+		<br>
+		<br>
+		
+		<button id="btn1">mode DATE</button>
+		<button id="btn2">mode RANGE</button>
+		<button id="btn3">interval 10 GG</button>
 	
 	</body>
 	
@@ -37,11 +44,36 @@
 		
 		cal = $('#test').PACalendar({
 			mode: 'range',
+			rangeInterval: [7,'d']
 		});
 		
 		cal.on('setDate', function(args) {
-			console.log(args.from.format('YYYYMMDD'), args.to.format('YYYYMMDD'));
+			console.log('from', args.from.format('YYYYMMDD'));
+			if (args.to) {
+				console.log('to', args.to.format('YYYYMMDD'));
+			}
 		})
+		
+		$('#btn1')
+			.on('click', function() {
+				
+				cal.setMode('date');
+				
+			})
+
+		$('#btn2')
+			.on('click', function() {
+				
+				cal.setMode('range');
+				
+			})
+			
+		$('#btn3')
+			.on('click', function() {
+				
+				cal.setRangeInterval([1,'w']);
+				
+			})
 		
 	})
 	
