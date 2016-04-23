@@ -2,8 +2,8 @@
 	"name": "PAcalendar",
 	"description": "jQuery Plugin for datepicker and rangepicker",
   "main": [
-    "dist/js/PAcalendar.min.js",
-    "dist/css/PAcalendar.min.css"
+    "src/js/PAcalendar.js",
+    "src/css/PAcalendar.css"
   ],
   "dependencies": {
     "moment": ">=2.10.6"
