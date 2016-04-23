@@ -341,6 +341,21 @@
 				fixRange();
 				cellsBetween();
 				
+				if (settings.mode === 'range' && selectedDateFrom && selectedDateTo) {
+					self.trigger({
+						type: 'setDate', 
+						from: moment(selectedDateFrom),
+						to: moment(selectedDateTo)
+					});
+				}
+
+				if (settings.mode !== 'range' && selectedDateFrom) {
+					self.trigger({
+						type: 'setDate',
+						from: moment(selectedDateFrom)
+					});
+				}
+				
 				return true;
 			} else {
 				return false;
@@ -359,6 +374,14 @@
 				
 				fixRange(true);
 				cellsBetween();
+				
+				if (settings.mode === 'range' && selectedDateFrom && selectedDateTo) {
+					self.trigger({
+						type: 'setDate', 
+						from: moment(selectedDateFrom),
+						to: moment(selectedDateTo)
+					});
+				}
 				
 				return true;
 			} else {
