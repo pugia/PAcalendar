@@ -330,8 +330,9 @@
 		};
 		
 		// change from date
-		self.setDateFrom = function(changeDate) {
+		self.setDateFrom = function(changeDate, doTrigger) {
 			
+			doTrigger = (typeof doTrigger == 'boolean') ? doTrigger : true;
 			var date = moment(changeDate, settings.format);
 			if (date.isValid()) {
 				monthEl.find('span:not(.PAto)').removeClass('PAselected PAfrom');
@@ -341,6 +342,23 @@
 				fixRange();
 				cellsBetween();
 				
+				if (doTrigger) {
+					if (settings.mode === 'range' && selectedDateFrom && selectedDateTo) {
+						self.trigger({
+							type: 'setDate', 
+							from: moment(selectedDateFrom),
+							to: moment(selectedDateTo)
+						});
+					}
+	
+					if (settings.mode !== 'range' && selectedDateFrom) {
+						self.trigger({
+							type: 'setDate',
+							from: moment(selectedDateFrom)
+						});
+					}
+				}
+				
 				return true;
 			} else {
 				return false;
@@ -349,8 +367,9 @@
 		};
 		
 		// change to date
-		self.setDateTo = function(changeDate) {
+		self.setDateTo = function(changeDate, doTrigger) {
 			
+			doTrigger = (typeof doTrigger == 'boolean') ? doTrigger : true;			
 			var date = moment(changeDate, settings.format);
 			if (date.isValid()) {
 				monthEl.find('span:not(.PAfrom)').removeClass('PAselected PAto');
@@ -359,6 +378,14 @@
 				
 				fixRange(true);
 				cellsBetween();
+				
+				if (doTrigger && settings.mode === 'range' && selectedDateFrom && selectedDateTo) {
+					self.trigger({
+						type: 'setDate', 
+						from: moment(selectedDateFrom),
+						to: moment(selectedDateTo)
+					});
+				}
 				
 				return true;
 			} else {
