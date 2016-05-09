@@ -66,7 +66,7 @@
 			
 			// week
 			weekEl = $('<section></section>').addClass('PAweek');
-			for (var i = 1; i < 8; i++) {	weekEl.append($('<span></span>').text(moment().day(i).format('dd')));	}
+			for (var i = 1; i < 8; i++) {	weekEl.append($('<span></span>').text(moment().isoWeekday(i).format('dd')));	}
 			
 			// month
 			monthEl = $('<section></section>').addClass('PAmonth');
@@ -96,7 +96,7 @@
 										
 			// set start position from the first day of the week
 			momentDate.set('date', 1);
-			momentDate.subtract((momentDate.day() || 8)-1, 'days');
+			momentDate.subtract((momentDate.isoWeekday() || 8)-1, 'days');
 			
 			monthEl.find('span').remove();
 			
